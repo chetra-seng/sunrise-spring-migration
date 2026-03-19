@@ -6,7 +6,7 @@ layout: center
 ## Add Indexes, Seed Dev Data, Test Contexts
 
 <!--
-15 minutes. Students apply what they just learned about indexes, seed data, and contexts.
+15 minutes. Applying indexes, seed data, and contexts from the previous section.
 -->
 
 ---
@@ -18,9 +18,10 @@ Your Task Flow API has 5 tables (`projects`, `users`, `roles`, `tasks`, `user_ro
 <v-clicks>
 
 1. **Add indexes** on `tasks` — `completed`, `project_id`, and `created_at` columns
-2. **Seed dev data** — 2 projects and 3 tasks that only appear in development
-3. **Add a new column** — `assignee VARCHAR(50)` — to simulate schema evolution
-4. **Test contexts** — verify seed data doesn't run in prod mode
+2. **Seed roles** — `VIEWER`, `USER`, `ADMIN`, `SUPER_ADMIN` on all environments, insert once
+3. **Seed test data** — projects and tasks only for `dev` and `uat`
+4. **Add a new column** — `assignee VARCHAR(50)` — to simulate schema evolution
+5. **Test contexts** — verify test data doesn't run in prod mode
 
 </v-clicks>
 
@@ -46,115 +47,126 @@ CREATE INDEX idx_tasks_created_at ON tasks(created_at);
 Then add it to `db.changelog-master.yaml`.
 
 ---
-zoom: 0.85
----
 
-# Step 2 — Create Dev Seed Data
+# Step 2 — Seed Roles (All Environments)
 
-Create `db/changelog/changes/007-seed-dev-data.sql`:
+Create `db/changelog/changes/007-seed-roles.sql`:
 
 ```sql
 --liquibase formatted sql
 
---changeset sunrise-team:007-seed-dev-data context:dev
-INSERT INTO projects (name, created_at)
-    VALUES ('Task Management System', CURRENT_TIMESTAMP);
-INSERT INTO projects (name, created_at)
-    VALUES ('E-Commerce Platform', CURRENT_TIMESTAMP);
+--changeset sunrise-team:007-seed-roles
+--preconditions onFail:MARK_RAN
+--precondition-sql-check expectedResult:0 SELECT COUNT(*) FROM roles WHERE name IN ('VIEWER','USER','ADMIN','SUPER_ADMIN')
+INSERT INTO roles (name) VALUES ('VIEWER');
+INSERT INTO roles (name) VALUES ('USER');
+INSERT INTO roles (name) VALUES ('ADMIN');
+INSERT INTO roles (name) VALUES ('SUPER_ADMIN');
+
+--rollback DELETE FROM roles WHERE name IN ('VIEWER','USER','ADMIN','SUPER_ADMIN');
 ```
 
----
-zoom: 0.85
+No `context:` — roles are required in every environment. The precondition prevents duplicates if someone inserted them manually.
+
 ---
 
-# Step 2 — Seed Tasks (continued)
+# Step 3 — Seed Test Data (Dev/UAT Only)
 
-Add the task inserts to the same `007-seed-dev-data.sql` file (after the projects):
+Create `db/changelog/changes/008-seed-dev-data.sql`:
 
 ```sql
-INSERT INTO tasks (title, description, completed, project_id, created_at)
-    VALUES ('Design login page UI',
-            'Create wireframes and implement the login form',
-            true, 1, CURRENT_TIMESTAMP);
-INSERT INTO tasks (title, description, completed, project_id, created_at)
-    VALUES ('Implement authentication API',
-            'JWT-based login and register endpoints',
-            false, 1, CURRENT_TIMESTAMP);
-INSERT INTO tasks (title, description, completed, project_id, created_at)
-    VALUES ('Shopping cart integration',
-            'Add to cart, update quantity, checkout flow',
-            false, 2, CURRENT_TIMESTAMP);
+--liquibase formatted sql
 
---rollback DELETE FROM tasks WHERE title IN ('Design login page UI','Implement authentication API','Shopping cart integration');
+--changeset sunrise-team:008-seed-dev-data context:dev,uat
+INSERT INTO projects (name, created_at) VALUES ('Task Management System', CURRENT_TIMESTAMP);
+INSERT INTO projects (name, created_at) VALUES ('E-Commerce Platform', CURRENT_TIMESTAMP);
+INSERT INTO tasks (title, completed, project_id, created_at)
+    VALUES ('Design login page UI', true, 1, CURRENT_TIMESTAMP);
+INSERT INTO tasks (title, completed, project_id, created_at)
+    VALUES ('Implement authentication API', false, 1, CURRENT_TIMESTAMP);
+
+--rollback DELETE FROM tasks WHERE title IN ('Design login page UI','Implement authentication API');
 --rollback DELETE FROM projects WHERE name IN ('Task Management System','E-Commerce Platform');
 ```
 
-Add to master changelog.
+Add both files to master changelog.
 
 ---
 
-# Step 3 — Configure Dev Context
+# Step 4 — Configure Contexts
 
-Create `src/main/resources/application-dev.properties`:
+Create or update `src/main/resources/application-dev.properties`:
 
 ```properties
 spring.liquibase.contexts=dev
 ```
 
-Create `src/main/resources/application-prod.properties`:
+Create or update `src/main/resources/application-prod.properties`:
 
 ```properties
 spring.liquibase.contexts=prod
 ```
 
+The `context:dev,uat` on the changeset means it runs in either `dev` or `uat` — but not `prod`.
+
 ---
 
-# Step 4 — Test Dev Context
+# Step 5 — Test Dev Context
 
 Start the app with the `dev` profile:
 
 ```bash
+# macOS/Linux
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+
+# Windows
+mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
-Then query (you'll need a JWT token — get one via `/api/auth/login`):
+Both changesets should run. Verify:
 
-```bash
-curl -s http://localhost:8888/api/tasks \
-  -H "Authorization: Bearer $TOKEN" | jq
+```sql
+SELECT * FROM roles;       -- 4 rows: VIEWER, USER, ADMIN, SUPER_ADMIN
+SELECT * FROM projects;    -- 2 rows: Task Management System, E-Commerce Platform
+SELECT * FROM tasks;       -- 2 rows
 ```
-
-You should see three tasks (Design login page UI, Implement authentication API, Shopping cart integration).
 
 ---
 
-# Step 5 — Test Prod Context
+# Step 6 — Test Prod Context
 
-Stop the app. Drop the seeded data (but not the tables):
+Stop the app. Clear test data and changelog entries:
 
 ```sql
 DELETE FROM tasks;
 DELETE FROM projects;
-DELETE FROM DATABASECHANGELOG WHERE id = '007-seed-dev-data';
+DELETE FROM roles;
+DELETE FROM DATABASECHANGELOG WHERE id IN ('007-seed-roles', '008-seed-dev-data');
 ```
 
 Start with prod profile:
 
 ```bash
+# macOS/Linux
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=prod
+
+# Windows
+mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=prod
 ```
 
-```bash
-curl -s http://localhost:8888/api/tasks \
-  -H "Authorization: Bearer $TOKEN" | jq
-# Should return []  — no seed data
+Then check:
+
+```sql
+SELECT * FROM roles;     -- 4 rows — roles run on all contexts
+SELECT * FROM projects;  -- 0 rows — dev data skipped in prod
+SELECT * FROM tasks;     -- 0 rows
 ```
 
 ---
 zoom: 0.85
 ---
 
-# Step 6 — Add assignee Column
+# Step 7 — Add assignee Column
 
 Create `db/changelog/changes/008-add-assignee-to-tasks.sql`:
 
@@ -182,8 +194,8 @@ private String assignee;
 <v-clicks>
 
 - [ ] Indexes on `completed`, `project_id`, `created_at` columns are present in the DB
-- [ ] Three tasks appear when running with `dev` profile
-- [ ] No tasks inserted when running with `prod` profile
+- [ ] Four roles present in both `dev` and `prod` profiles
+- [ ] Projects and tasks appear in `dev` but not `prod`
 - [ ] `assignee` column added to `tasks` table without data loss
 - [ ] `TaskModel.java` updated to include the new `assignee` field
 

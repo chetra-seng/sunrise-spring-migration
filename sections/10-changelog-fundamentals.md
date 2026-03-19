@@ -155,7 +155,7 @@ Both produce identical results. SQL is more familiar and easier to test first in
 
 ---
 
-# Common Changeset Operations
+# Common Changeset Operations (1/2)
 
 Beyond `createTable` and `addColumn`, you'll frequently use:
 
@@ -168,6 +168,17 @@ Beyond `createTable` and `addColumn`, you'll frequently use:
 | `dropColumn` | Remove a column |
 | `renameColumn` | Rename a column |
 | `modifyDataType` | Change a column's type |
+
+</v-clicks>
+
+---
+
+# Common Changeset Operations (2/2)
+
+<v-clicks>
+
+| Operation | What it does |
+|----------|-------------|
 | `createIndex` | Add an index |
 | `addForeignKeyConstraint` | Add a foreign key |
 | `insert` | Insert a row (seed data) |
@@ -200,5 +211,5 @@ This is the most important rule in Liquibase. Violating it breaks deployments.
 </v-click>
 
 <!--
-Emphasize this. Students will be tempted to edit changesets to fix mistakes. The correct approach is always a new changeset.
+Emphasize this. The temptation is to edit a changeset to fix a mistake. The correct approach is always a new changeset.
 -->

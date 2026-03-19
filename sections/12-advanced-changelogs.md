@@ -24,7 +24,7 @@ Liquibase stores an MD5 checksum. If you change the changeset content, the next 
 ```
 Caused by: liquibase.exception.ValidationFailedException:
   Validation Failed: 1 change sets check sum
-  db/changelog/changes/001-create-projects-table.yaml::001-create-projects-table::sunrise-team
+  db/changelog/changes/001-create-projects-table.sql::001-create-projects-table::sunrise-team
   was: 9:abc123... but is now: 9:def456...
 ```
 
@@ -67,23 +67,18 @@ zoom: 0.85
 
 # Seeding Initial Data
 
-Use `insert` changesets to add reference data or dev data:
+Use `insert` changesets to populate reference or test data:
 
 ```sql
 --liquibase formatted sql
 
---changeset sunrise-team:007-seed-initial-data
-INSERT INTO projects (name, created_at)
-    VALUES ('Task Management System', CURRENT_TIMESTAMP);
-INSERT INTO projects (name, created_at)
-    VALUES ('E-Commerce Platform', CURRENT_TIMESTAMP);
-INSERT INTO tasks (title, description, completed, project_id, created_at)
-    VALUES ('Design login page UI',
-            'Create wireframes and implement the login form',
-            true, 1, CURRENT_TIMESTAMP);
+--changeset sunrise-team:007-seed-roles
+INSERT INTO roles (name) VALUES ('VIEWER');
+INSERT INTO roles (name) VALUES ('USER');
+INSERT INTO roles (name) VALUES ('ADMIN');
+INSERT INTO roles (name) VALUES ('SUPER_ADMIN');
 
---rollback DELETE FROM tasks WHERE title = 'Design login page UI';
---rollback DELETE FROM projects WHERE name IN ('Task Management System', 'E-Commerce Platform');
+--rollback DELETE FROM roles WHERE name IN ('VIEWER','USER','ADMIN','SUPER_ADMIN');
 ```
 
 ---
@@ -103,6 +98,8 @@ The order of your changesets matters. Follow these rules:
 
 <v-click>
 
+<Transform :scale="0.9">
+
 ```yaml
 # Good ordering in master changelog:
 databaseChangeLog:
@@ -119,8 +116,12 @@ databaseChangeLog:
   - include:
       file: db/changelog/changes/006-add-task-indexes.sql
   - include:
-      file: db/changelog/changes/007-seed-initial-data.sql
+      file: db/changelog/changes/007-seed-roles.sql
+  - include:
+      file: db/changelog/changes/008-seed-dev-data.sql
 ```
+
+</Transform>
 
 </v-click>
 
@@ -128,24 +129,33 @@ databaseChangeLog:
 
 # Preconditions
 
-Preconditions run before a changeset to check if it should execute:
+What if someone manually inserted `ADMIN` directly in the dev DB — then the team deploys? The seed changeset runs again and throws a **duplicate key error**.
+
+<v-click>
+
+Preconditions let you check first — run the changeset only if the condition is met:
 
 ```sql
 --liquibase formatted sql
 
---changeset sunrise-team:008-add-assignee-to-tasks
---preconditions onFail:SKIP
---precondition-sql-check expectedResult:0 SELECT COUNT(*) FROM information_schema.columns WHERE table_name='tasks' AND column_name='assignee'
-ALTER TABLE tasks ADD COLUMN assignee VARCHAR(50);
+--changeset sunrise-team:007-seed-roles
+--preconditions onFail:MARK_RAN
+--precondition-sql-check expectedResult:0 SELECT COUNT(*) FROM roles WHERE name IN ('VIEWER','USER','ADMIN','SUPER_ADMIN')
+INSERT INTO roles (name) VALUES ('VIEWER');
+INSERT INTO roles (name) VALUES ('USER');
+INSERT INTO roles (name) VALUES ('ADMIN');
+INSERT INTO roles (name) VALUES ('SUPER_ADMIN');
 
---rollback ALTER TABLE tasks DROP COLUMN assignee;
+--rollback DELETE FROM roles WHERE name IN ('VIEWER','USER','ADMIN','SUPER_ADMIN');
 ```
+
+</v-click>
 
 <v-click>
 
-`onFail:SKIP` — if the precondition fails, skip this changeset (instead of erroring). Useful for idempotent scripts.
-
-Other options: `onFail:MARK_RAN` (record as run but skip), `onFail:HALT` (fail the deployment).
+- **`onFail:MARK_RAN`** — roles already exist? Record it as done and move on silently
+- **`onFail:HALT`** — fail the deployment (use for critical structural checks)
+- **`onFail:SKIP`** — skip without recording (changeset will attempt again next time)
 
 </v-click>
 
@@ -153,25 +163,25 @@ Other options: `onFail:MARK_RAN` (record as run but skip), `onFail:HALT` (fail t
 
 # Raw SQL Escape Hatch
 
-When YAML operations aren't enough, use raw SQL:
+When YAML operations aren't enough, use raw SQL — like inserting roles with a select-based guard:
 
 ```sql
 --liquibase formatted sql
 
---changeset sunrise-team:009-mark-old-tasks-complete
-UPDATE tasks
-SET completed = true
-WHERE created_at < NOW() - INTERVAL '90 days'
-  AND completed = false;
+--changeset sunrise-team:008-seed-roles-raw-sql
+INSERT INTO roles (name)
+SELECT r.name
+FROM (VALUES ('VIEWER'), ('USER'), ('ADMIN'), ('SUPER_ADMIN')) AS r(name)
+WHERE NOT EXISTS (SELECT 1 FROM roles WHERE roles.name = r.name);
 
---rollback UPDATE tasks SET completed = false WHERE created_at < NOW() - INTERVAL '90 days';
+--rollback DELETE FROM roles WHERE name IN ('VIEWER','USER','ADMIN','SUPER_ADMIN');
 ```
 
 <v-click>
 
-Use `sql:` for:
+Use raw SQL for:
+- `INSERT ... SELECT` with conditional logic
 - Data transformations
-- Complex `UPDATE` or `INSERT ... SELECT` statements
 - Database-specific features not covered by Liquibase operations
 - Bulk operations
 

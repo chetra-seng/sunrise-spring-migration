@@ -76,7 +76,9 @@ The "before" state is what auto-detection gives you. The "after" is what a singl
 @GetMapping
 public List<TaskResponse> getAllTask(
         @RequestParam(required = false) Boolean completed) {
-    return taskService.findAll();
+    return taskService.findAll().stream()
+        .filter(t -> completed == null || completed.equals(t.getCompleted()))
+        .toList();
 }
 ```
 

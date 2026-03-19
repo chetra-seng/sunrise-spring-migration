@@ -6,7 +6,7 @@ layout: center
 ## Evolve and Revert Safely
 
 <!--
-20-minute lab. Students practice the full migration + rollback cycle. The most important lab in this module.
+20-minute lab. Full migration + rollback cycle. The most important lab in this module.
 -->
 
 ---
@@ -25,6 +25,8 @@ You'll simulate a real deployment scenario:
 
 </v-clicks>
 
+---
+zoom: 0.85
 ---
 
 # Step 1 — Add the Liquibase Maven Plugin
@@ -62,7 +64,11 @@ Add to `pom.xml` inside `<build><plugins>`:
 Before making changes, tag the current schema so we can roll back to it:
 
 ```bash
+# macOS/Linux
 ./mvnw liquibase:tag -Dliquibase.tag=before-estimated-hours
+
+# Windows
+mvnw.cmd liquibase:tag -Dliquibase.tag=before-estimated-hours
 ```
 
 Verify in the database:
@@ -100,7 +106,11 @@ Add it to `db.changelog-master.yaml`.
 Start the app and verify the column was added:
 
 ```bash
+# macOS/Linux
 ./mvnw spring-boot:run
+
+# Windows
+mvnw.cmd spring-boot:run
 ```
 
 Then in the database:
@@ -128,7 +138,8 @@ The feature was cut. Roll back to before estimated_hours was added:
 # Ctrl+C to stop
 
 # Roll back to our tag
-./mvnw liquibase:rollback -Dliquibase.rollbackTag=before-estimated-hours
+./mvnw liquibase:rollback -Dliquibase.rollbackTag=before-estimated-hours      # macOS/Linux
+mvnw.cmd liquibase:rollback -Dliquibase.rollbackTag=before-estimated-hours    # Windows
 ```
 
 <v-click>
@@ -163,7 +174,8 @@ SELECT id FROM DATABASECHANGELOG WHERE id = '009-add-estimated-hours-column';
 Also verify the app starts successfully without the column:
 
 ```bash
-./mvnw spring-boot:run
+./mvnw spring-boot:run        # macOS/Linux
+mvnw.cmd spring-boot:run      # Windows
 # Should start without errors
 ```
 
@@ -180,7 +192,8 @@ curl -s http://localhost:8888/api/tasks | jq
 Before rolling back in production, always preview what SQL will run:
 
 ```bash
-./mvnw liquibase:rollbackSQL -Dliquibase.rollbackCount=1
+./mvnw liquibase:rollbackSQL -Dliquibase.rollbackCount=1      # macOS/Linux
+mvnw.cmd liquibase:rollbackSQL -Dliquibase.rollbackCount=1    # Windows
 ```
 
 Output:

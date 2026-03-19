@@ -79,13 +79,16 @@ Liquibase gives you several rollback strategies:
 
 ```bash
 # Roll back the last N changesets
-./mvnw liquibase:rollback -Dliquibase.rollbackCount=1
+./mvnw liquibase:rollback -Dliquibase.rollbackCount=1       # macOS/Linux
+mvnw.cmd liquibase:rollback -Dliquibase.rollbackCount=1     # Windows
 
 # Roll back to a specific tag
-./mvnw liquibase:rollback -Dliquibase.rollbackTag=v1.0
+./mvnw liquibase:rollback -Dliquibase.rollbackTag=v1.0      # macOS/Linux
+mvnw.cmd liquibase:rollback -Dliquibase.rollbackTag=v1.0    # Windows
 
 # Roll back to a date
-./mvnw liquibase:rollbackToDate -Dliquibase.rollbackDate="2026-03-17 10:00:00"
+./mvnw liquibase:rollbackToDate -Dliquibase.rollbackDate="2026-03-17 10:00:00"      # macOS/Linux
+mvnw.cmd liquibase:rollbackToDate -Dliquibase.rollbackDate="2026-03-17 10:00:00"    # Windows
 ```
 
 <v-click>
@@ -94,7 +97,8 @@ You can also preview the rollback SQL without executing it:
 
 ```bash
 # Generate rollback SQL to a file (dry run)
-./mvnw liquibase:rollbackSQL -Dliquibase.rollbackCount=1
+./mvnw liquibase:rollbackSQL -Dliquibase.rollbackCount=1      # macOS/Linux
+mvnw.cmd liquibase:rollbackSQL -Dliquibase.rollbackCount=1    # Windows
 ```
 
 </v-click>
@@ -107,8 +111,11 @@ Tags let you mark a point in time and roll back to it by name:
 
 ```bash
 # After a successful release, tag the current schema state
-./mvnw liquibase:tag -Dliquibase.tag=v1.0
-./mvnw liquibase:tag -Dliquibase.tag=release-2026-03-17
+./mvnw liquibase:tag -Dliquibase.tag=v1.0                     # macOS/Linux
+mvnw.cmd liquibase:tag -Dliquibase.tag=v1.0                   # Windows
+
+./mvnw liquibase:tag -Dliquibase.tag=release-2026-03-17       # macOS/Linux
+mvnw.cmd liquibase:tag -Dliquibase.tag=release-2026-03-17     # Windows
 ```
 
 <v-click>
@@ -116,7 +123,8 @@ Tags let you mark a point in time and roll back to it by name:
 Now if something goes wrong after deploying v2.0, you can roll back to the last tagged state:
 
 ```bash
-./mvnw liquibase:rollback -Dliquibase.rollbackTag=v1.0
+./mvnw liquibase:rollback -Dliquibase.rollbackTag=v1.0      # macOS/Linux
+mvnw.cmd liquibase:rollback -Dliquibase.rollbackTag=v1.0    # Windows
 ```
 
 </v-click>
@@ -128,7 +136,7 @@ Best practice: tag before every production deployment. It costs nothing and save
 </v-click>
 
 ---
-zoom: 0.85
+zoom: 0.80
 ---
 
 # Configuring Liquibase Maven Plugin

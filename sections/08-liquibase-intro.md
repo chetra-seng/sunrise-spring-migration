@@ -84,15 +84,15 @@ You typically have a **master changelog** that imports section-specific changelo
 # db/changelog/db.changelog-master.yaml
 databaseChangeLog:
   - include:
-      file: db/changelog/changes/001-create-projects-table.yaml
+      file: db/changelog/changes/001-create-projects-table.sql
   - include:
-      file: db/changelog/changes/002-create-users-table.yaml
+      file: db/changelog/changes/002-create-users-table.sql
   - include:
-      file: db/changelog/changes/003-create-roles-table.yaml
+      file: db/changelog/changes/003-create-roles-table.sql
   - include:
-      file: db/changelog/changes/004-create-tasks-table.yaml
+      file: db/changelog/changes/004-create-tasks-table.sql
   - include:
-      file: db/changelog/changes/005-create-user-role-table.yaml
+      file: db/changelog/changes/005-create-user-role-table.sql
 ```
 
 <v-click>

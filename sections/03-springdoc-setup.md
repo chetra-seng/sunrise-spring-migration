@@ -70,8 +70,8 @@ Add an `OpenApiConfig` bean to customize the title, description, and version sho
 package com.chetraseng.sunrise_task_flow_api.config;
 
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.Contact;
+import io.swagger.v3.oas.models.info.Info;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -95,6 +95,43 @@ public class OpenApiConfig {
 <!--
 This is optional but professional. The title and description appear at the top of Swagger UI.
 -->
+
+---
+
+# Spring Security + Swagger UI
+
+The Task Flow API has Spring Security — visiting `/swagger-ui.html` returns **401** by default. Two fixes needed:
+
+**1 — Permit Swagger paths in `SecurityConfig.java`** (before `.anyRequest().authenticated()`):
+
+```java
+.requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+```
+
+<v-click>
+
+**2 — Add a JWT security scheme to `OpenApiConfig.java`** (enables the "Authorize" button):
+
+```java
+// Additional imports: io.swagger.v3.oas.models.Components,
+//   io.swagger.v3.oas.models.security.{SecurityRequirement, SecurityScheme}
+
+.addSecurityItem(new SecurityRequirement().addList("Bearer Authentication"))
+.components(new Components()
+    .addSecuritySchemes("Bearer Authentication",
+        new SecurityScheme()
+            .type(SecurityScheme.Type.HTTP)
+            .scheme("bearer")
+            .bearerFormat("JWT")))
+```
+
+</v-click>
+
+<v-click>
+
+You can now open Swagger UI without a token, click **Authorize**, paste your JWT, and call secured endpoints directly from the browser.
+
+</v-click>
 
 ---
 
@@ -127,7 +164,7 @@ For now, defaults are fine. In production, consider disabling Swagger UI and onl
 </v-click>
 
 ---
-zoom: 0.85
+zoom: 0.80
 ---
 
 # What the Raw OpenAPI Spec Looks Like
@@ -190,5 +227,5 @@ When you open `/swagger-ui.html` you'll see:
 </v-clicks>
 
 <!--
-Live demo here is very effective. Show students what each part does before they annotate anything.
+Live demo here is very effective. Walk through what each part does before annotating anything.
 -->

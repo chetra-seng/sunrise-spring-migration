@@ -48,7 +48,7 @@ With `ddl-auto=update`, Hibernate silently modifies your schema on every restart
 </v-clicks>
 
 <!--
-This scenario resonates with students. Ask: "Has anyone lost dev data because of this?"
+Ask: "Has anyone lost dev data because of this?" Usually gets a reaction.
 -->
 
 ---
@@ -190,5 +190,5 @@ We'll use **Liquibase** because it teaches more concepts and is more common in e
 </v-click>
 
 <!--
-Both are good choices. Tell students that knowing one makes the other easy to pick up.
+Both are good choices. Knowing one makes the other easy to pick up.
 -->

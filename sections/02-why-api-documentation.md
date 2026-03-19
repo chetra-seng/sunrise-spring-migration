@@ -61,7 +61,7 @@ This is what `springdoc-openapi` gives you — for free, from annotations you wr
 
 # OpenAPI vs Swagger — What's the Difference?
 
-Students often hear both terms. Here's the relationship:
+You'll often hear both terms used interchangeably. Here's the relationship:
 
 <div class="grid grid-cols-2 gap-6 mt-4">
 
@@ -170,5 +170,5 @@ And you'll write **zero extra code** — just annotations on classes you already
 </v-click>
 
 <!--
-This motivates students to keep going — the payoff is clear and concrete.
+This motivates keeping going — the payoff is clear and concrete.
 -->

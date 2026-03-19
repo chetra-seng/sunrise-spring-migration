@@ -78,10 +78,13 @@ spring.liquibase.contexts=prod
 Then activate the profile when starting:
 
 ```bash
-# Development
+# macOS/Linux
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
 
-# Production
+# Windows
+mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=dev
+
+# Production (any OS)
 java -jar app.jar --spring.profiles.active=prod
 ```
 

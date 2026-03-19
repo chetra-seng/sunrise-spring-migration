@@ -62,17 +62,19 @@ You have a **production-ready** API — not just working code, but documented, s
 - `liquibase-core` dependency
 - `ddl-auto=validate` (Liquibase manages schema)
 - `db.changelog-master.yaml` entry point
-- `001-create-projects-table.yaml`
-- `002-create-users-table.yaml`
-- `003-create-roles-table.yaml`
-- `004-create-tasks-table.yaml`
-- `005-create-user-role-table.yaml`
+- `001-create-projects-table.sql`
+- `002-create-users-table.sql`
+- `003-create-roles-table.sql`
+- `004-create-tasks-table.sql`
+- `005-create-user-role-table.sql`
 - Rollback with Maven plugin + tags
 
 </div>
 
 </div>
 
+---
+zoom: 0.75
 ---
 
 # Architecture: Where Everything Lives
@@ -86,26 +88,31 @@ src/main/
 └── java/com/chetraseng/sunrise_task_flow_api/
     ├── config/
     │   ├── OpenApiConfig.java         ← NEW
-    │   └── SecurityConfig.java
+    │   └── SecurityConfig.java        ← updated
     ├── controllers/
     │   ├── TaskController.java        ← annotated
     │   ├── AuthController.java
     │   └── RoleController.java
     ├── dto/
     │   ├── TaskRequest.java           ← @Schema
-    │   └── TaskResponse.java          ← @Schema
-    ├── model/
-    │   ├── TaskModel.java
-    │   ├── ProjectModel.java
-    │   ├── UserModel.java
-    │   ├── RoleModel.java
-    │   └── UserRoleModel.java
+    │   ├── TaskResponse.java          ← @Schema
+    │   └── ErrorResponse.java
+    ├── exception/
+    │   └── GlobalExceptionHandler.java
     ├── mapper/
     │   └── TaskMapper.java
+    ├── model/
+    │   ├── TaskModel.java
+    │   └── UserModel.java
+    ├── repository/
+    │   └── TaskRepository.java
+    ├── security/
+    │   ├── JwtFilter.java
+    │   └── JwtService.java
     ├── services/
     │   └── TaskServiceImpl.java
-    └── exception/
-        └── ErrorResponse.java
+    └── spec/
+        └── TaskSpec.java
 ```
 
 </div>
@@ -121,11 +128,11 @@ src/main/resources/
     └── changelog/
         ├── db.changelog-master.yaml   ← NEW
         └── changes/
-            ├── 001-create-projects-table.yaml  ← NEW
-            ├── 002-create-users-table.yaml     ← NEW
-            ├── 003-create-roles-table.yaml     ← NEW
-            ├── 004-create-tasks-table.yaml     ← NEW
-            └── 005-create-user-role-table.yaml ← NEW
+            ├── 001-create-projects-table.sql   ← NEW
+            ├── 002-create-users-table.sql      ← NEW
+            ├── 003-create-roles-table.sql      ← NEW
+            ├── 004-create-tasks-table.sql      ← NEW
+            └── 005-create-user-role-table.sql  ← NEW
 ```
 
 </div>

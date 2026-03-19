@@ -6,7 +6,7 @@ layout: center
 ## Hands-On Practice — Swagger
 
 <!--
-Give students 20 minutes. Walk around and help. Most common issue: wrong import for @ApiResponse.
+20 minutes. Most common issue: wrong import for @ApiResponse.
 -->
 
 ---
@@ -17,11 +17,12 @@ Your Task Flow API runs but has no documentation. By the end of this lab, every 
 
 <v-clicks>
 
-**Four steps:**
+**Five steps:**
 1. Add `springdoc-openapi` dependency
-2. Create `OpenApiConfig` bean
+2. Create `OpenApiConfig` bean + update `SecurityConfig`
 3. Annotate `TaskController` with `@Tag`, `@Operation`, `@ApiResponse`
 4. Annotate `TaskRequest` and `TaskResponse` with `@Schema`
+5. Verify in Swagger UI
 
 **Goal:** Open `/swagger-ui.html` and see a fully documented Task Flow API with working "Try it out."
 
@@ -45,11 +46,17 @@ Open `pom.xml` and add inside `<dependencies>`:
 Then run:
 
 ```bash
+# macOS/Linux
 ./mvnw dependency:resolve
+
+# Windows
+mvnw.cmd dependency:resolve
 ```
 
 Or just restart your IDE — it will download the dependency automatically.
 
+---
+zoom: 0.75
 ---
 
 # Step 2 — Create OpenApiConfig.java
@@ -59,9 +66,12 @@ Create `src/main/java/com/chetraseng/sunrise_task_flow_api/config/OpenApiConfig.
 ```java
 package com.chetraseng.sunrise_task_flow_api.config;
 
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -76,12 +86,36 @@ public class OpenApiConfig {
                 .description("REST API for managing tasks, projects, and users")
                 .version("v1.0")
                 .contact(new Contact()
-                    .name("Sunrise Team")));
+                    .name("Sunrise Team")
+                    .email("team@sunrise.dev")))
+            .addSecurityItem(new SecurityRequirement().addList("Bearer Authentication"))
+            .components(new Components()
+                .addSecuritySchemes("Bearer Authentication",
+                    new SecurityScheme()
+                        .type(SecurityScheme.Type.HTTP)
+                        .scheme("bearer")
+                        .bearerFormat("JWT")));
     }
 }
 ```
 
-Start the app and open `http://localhost:8888/swagger-ui.html` — you should see your API.
+---
+
+# Step 2 — Update SecurityConfig.java
+
+The API uses Spring Security — `/swagger-ui.html` returns **401** without this fix.
+
+Open `SecurityConfig.java` and add these matchers **before** `.anyRequest().authenticated()`:
+
+```java
+.requestMatchers(
+    "/swagger-ui.html",
+    "/swagger-ui/**",
+    "/v3/api-docs/**"
+).permitAll()
+```
+
+Then start the app and open `http://localhost:8888/swagger-ui.html`. You should see the API with an **Authorize** button — use it to paste your JWT token before calling secured endpoints.
 
 ---
 zoom: 0.85
@@ -106,7 +140,9 @@ public class TaskController {
     public List<TaskResponse> getAllTask(
             @Parameter(description = "Filter by completion status", example = "false")
             @RequestParam(required = false) Boolean completed) {
-        return taskService.findAll();
+        return taskService.findAll().stream()
+            .filter(t -> completed == null || completed.equals(t.getCompleted()))
+            .toList();
     }
     // ... continue for other endpoints
 }
@@ -135,6 +171,8 @@ public TaskResponse getTaskById(
 ```
 
 ---
+zoom: 0.85
+---
 
 # Step 3 — Annotate create, update & delete
 
@@ -157,6 +195,7 @@ public TaskResponse updateTask(
 }
 
 @Operation(summary = "Delete a task")
+@ResponseStatus(HttpStatus.NO_CONTENT)
 @DeleteMapping("/{id}")
 public void deleteTask(@PathVariable Long id) {
     taskService.delete(id);
@@ -199,7 +238,7 @@ public TaskResponse completeTask(
 public PaginationResponse<TaskResponse> filterTasks(
         @Parameter(description = "Filter by completion status") FilterTaskDto filter,
         @Parameter(description = "Pagination settings") Pagination pagination) {
-    return taskService.filterTask(filter, pagination);
+    return new PaginationResponse<>(taskService.filterTask(filter, pagination), pagination);
 }
 ```
 

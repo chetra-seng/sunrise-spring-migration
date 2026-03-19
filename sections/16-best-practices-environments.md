@@ -13,21 +13,21 @@ Consistent naming makes your changelog directory readable at a glance:
 
 <v-clicks>
 
-**Pattern:** `NNN-verb-subject.yaml`
+**Pattern:** `NNN-verb-subject.sql`
 
 </v-clicks>
 
 <v-click>
 
 ```
-001-create-projects-table.yaml
-002-create-users-table.yaml
-003-create-roles-table.yaml
-004-create-tasks-table.yaml
-005-create-user-role-table.yaml
-006-add-task-indexes.yaml
-007-seed-dev-data.yaml
-008-add-assignee-to-tasks.yaml
+001-create-projects-table.sql
+002-create-users-table.sql
+003-create-roles-table.sql
+004-create-tasks-table.sql
+005-create-user-role-table.sql
+006-add-task-indexes.sql
+007-seed-dev-data.sql
+008-add-assignee-to-tasks.sql
 ```
 
 </v-click>
@@ -196,7 +196,7 @@ Always commit:
 
 <v-clicks>
 
-✅ All changelog files (`db/changelog/changes/*.yaml`)
+✅ All changelog files (`db/changelog/changes/*.sql`)
 
 ✅ Master changelog (`db.changelog-master.yaml`)
 
@@ -239,5 +239,5 @@ Set environment variables in your deployment platform (Kubernetes secrets, Herok
 </v-click>
 
 <!--
-This is a security fundamentals reminder. Mention it briefly — students will encounter this pattern in every real project.
+This is a security fundamentals reminder. Mention it briefly — this pattern comes up in every real project.
 -->

@@ -55,5 +55,5 @@ Version-control your database schema.
 </div>
 
 <!--
-~5 minutes total for intro. Keep it moving — students want to see real code.
+~5 minutes total for intro. Keep it moving — everyone wants to see real code.
 -->

@@ -143,7 +143,7 @@ Use `validate` in development to catch mismatches between your `@Entity` classes
 
 ---
 
-# The Full application.properties
+# The Full application-dev.properties
 
 ```properties
 server.port=8888
@@ -152,7 +152,6 @@ server.port=8888
 spring.datasource.url=jdbc:postgresql://localhost:5432/taskflow_db
 spring.datasource.username=postgres
 spring.datasource.password=password
-spring.datasource.driver-class-name=org.postgresql.Driver
 
 # JPA — let Liquibase manage the schema
 spring.jpa.hibernate.ddl-auto=validate
@@ -230,7 +229,8 @@ When adding Liquibase to a project that already has tables:
 ```bash
 # Step 1: write changelogs that match your current schema exactly
 # Step 2: tell Liquibase "these are already done — don't run them"
-./mvnw liquibase:changelogSync
+./mvnw liquibase:changelogSync        # macOS/Linux
+mvnw.cmd liquibase:changelogSync      # Windows
 
 # Step 3: from now on, all schema changes go through new changelogs
 ```
@@ -247,7 +247,8 @@ After `changelogSync`, your next migration runs normally. Liquibase is now in co
 
 ```bash
 # Verify — all changesets show as executed:
-./mvnw liquibase:status
+./mvnw liquibase:status        # macOS/Linux
+mvnw.cmd liquibase:status      # Windows
 ```
 
 </v-click>

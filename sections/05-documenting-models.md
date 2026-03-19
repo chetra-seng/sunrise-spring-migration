@@ -167,5 +167,5 @@ This is what you'll build in the next lab.
 </v-click>
 
 <!--
-Students often don't realize how much documentation they're generating until they see the full Swagger UI. Good moment to demo a fully annotated controller.
+It's easy to underestimate how much documentation gets generated until you see the full Swagger UI. Good moment to demo a fully annotated controller.
 -->

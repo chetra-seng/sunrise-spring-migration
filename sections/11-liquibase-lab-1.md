@@ -6,7 +6,7 @@ layout: center
 ## Migrate the Task Flow API to Liquibase
 
 <!--
-This is the foundational lab. Give students 25 minutes. The biggest hurdle is YAML indentation — walk around and help.
+This is the foundational lab. 25 minutes. The biggest hurdle is YAML indentation.
 -->
 
 ---
@@ -53,6 +53,8 @@ No version tag — Spring Boot manages it.
 
 # Step 2 — Update application-dev.properties
 
+<Transform :scale="0.9">
+
 ```properties
 server.port=8888
 
@@ -82,6 +84,9 @@ jwt.refresh-expiration=604800000
 `validate` means Hibernate will check that your DB matches your `@Entity` classes but won't modify anything — Liquibase owns all schema changes now.
 
 </v-click>
+
+</Transform>
+
 
 ---
 
@@ -216,9 +221,8 @@ CREATE TABLE roles (
 zoom: 0.85
 ---
 
-# Step 6 — Create 004 & 005 Changesets
+# Step 6 — Create 004-create-tasks-table.sql
 
-**004-create-tasks-table.sql:**
 ```sql
 --liquibase formatted sql
 
@@ -235,7 +239,12 @@ CREATE TABLE tasks (
 --rollback DROP TABLE tasks;
 ```
 
-**005-create-user-role-table.sql:**
+---
+zoom: 0.85
+---
+
+# Step 6 — Create 005-create-user-role-table.sql
+
 ```sql
 --liquibase formatted sql
 
@@ -255,7 +264,11 @@ CREATE TABLE user_role (
 # Step 7 — Start the Application
 
 ```bash
+# macOS/Linux
 ./mvnw spring-boot:run
+
+# Windows
+mvnw.cmd spring-boot:run
 ```
 
 Look for these lines in the startup log:
@@ -352,7 +365,7 @@ curl -s http://localhost:8888/api/tasks \
 
 <v-click>
 
-Every future schema change will be a new `.yaml` file in `changes/`. Your team can review them in Git before they run. New team members get the full schema history automatically.
+Every future schema change will be a new `.sql` file in `changes/`. Your team can review them in Git before they run. New team members get the full schema history automatically.
 
 </v-click>
 
