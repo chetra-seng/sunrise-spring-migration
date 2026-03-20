@@ -22,7 +22,7 @@ Your Task Flow API uses `ddl-auto=update`. You're going to replace it with Liqui
 > In a real existing project you'd use `changelogSync` instead of dropping tables — that's covered in the setup section.
 
 **What changes:**
-- `pom.xml` — add `liquibase-core`
+- `pom.xml` — add `spring-boot-starter-liquibase`
 - `application-dev.properties` — switch from `ddl-auto=update` to `ddl-auto=validate`
 - New files: `db.changelog-master.yaml` (YAML index) and five `.sql` changeset files (one per table)
 
@@ -42,8 +42,8 @@ Open `pom.xml` and add inside `<dependencies>`:
 ```xml
 <!-- Liquibase database migrations -->
 <dependency>
-    <groupId>org.liquibase</groupId>
-    <artifactId>liquibase-core</artifactId>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-liquibase</artifactId>
 </dependency>
 ```
 

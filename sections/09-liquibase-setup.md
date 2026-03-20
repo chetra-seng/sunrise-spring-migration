@@ -15,8 +15,8 @@ layout: center
 
     <!-- Liquibase for database migrations -->
     <dependency>
-        <groupId>org.liquibase</groupId>
-        <artifactId>liquibase-core</artifactId>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-liquibase</artifactId>
     </dependency>
 </dependencies>
 ```

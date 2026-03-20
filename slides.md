@@ -135,7 +135,7 @@ You've made your Task Flow API production-ready with documentation and safe sche
 **What you added:**
 - `springdoc-openapi` dependency → Swagger UI at `/swagger-ui.html`
 - `@Tag`, `@Operation`, `@ApiResponse`, `@Schema` → rich API documentation
-- `liquibase-core` dependency → schema version control
+- `spring-boot-starter-liquibase` dependency → schema version control
 - `db/changelog/` directory → versioned SQL migrations in YAML/XML
 - `ddl-auto=validate` or `none` → no more surprise schema changes
 

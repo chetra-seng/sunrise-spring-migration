@@ -59,7 +59,7 @@ You have a **production-ready** API — not just working code, but documented, s
 <div>
 
 **Liquibase**
-- `liquibase-core` dependency
+- `spring-boot-starter-liquibase` dependency
 - `ddl-auto=validate` (Liquibase manages schema)
 - `db.changelog-master.yaml` entry point
 - `001-create-projects-table.sql`
